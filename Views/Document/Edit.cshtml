@@ -1,0 +1,272 @@
+﻿@using System.Xml.Linq;
+@model Int32?
+@{
+    ViewBag.Title = "Edit Document Data";
+}
+
+<div>
+    <!-- ko with: dataDocument -->
+    <div style="text-align:right; vertical-align:middle; height:100%;font-weight:700;" >
+        <span>Edit Document</span>&nbsp;:&nbsp;<span data-bind="text: Name"/>
+    </div>
+    <div data-bind="tabs: { refreshOn: dataSets, options: { active: 1 } }">
+        <ul>
+            <li>
+                <a href="#tab-groups">Data</a>
+            </li>
+            <li><a href="#tab-datasets">Data Sets</a></li>
+            <li><a href="#tab-messages">Messages</a></li>
+        </ul>
+        <div id="tab-groups">
+            <div>
+                <select style="width:50%" data-bind="options: dataSets, optionsText: 'Name', value: editTemplateDataSet"></select>
+            </div>
+            <!-- ko with: editTemplateDataSet -->
+            <table class="defaultTable">
+                <thead>
+                    <tr>
+                        <th>Name</th>
+                        <th style="text-align:right; padding-bottom: 2px">Value</th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <!-- ko foreach: items -->
+                    <tr>
+                        <td style="white-space : nowrap;" data-bind="text: Description, attr: { title: Name() + ' | ' + SortOrder() }"></td>
+                        <td style="text-align:right;">
+                            <span data-bind="text: Value, attr: { title: Value() }" />
+                        </td>
+                        <td style="text-align:right; width:4em;">
+                            <button data-bind="click: $root.selectTemplateDataItem, button: { text: false, icons: { primary: 'ui-icon-check' } }">select</button>
+                        </td>
+                    </tr>
+                    <!-- /ko -->                        
+                </tbody>
+            </table>
+            <div style="height:1em;"></div>
+            <div>
+                <button data-bind="click: openAddTemplateFieldDialog, button: { text: true, icons: { primary: 'ui-icon-plus' } }">Add Template Field</button>
+                <div id="addTemplateFieldDialog" style="display:none" data-bind="dialog: {
+                    autoOpen: false,
+                    title: 'Add Template Field',
+                    isOpen: isOpenAddTemplateFieldDialog,
+                    closeOnEscape: true, height: 400, width: 500, modal: true,
+                    buttons: {
+                        'Save': addTemplateField,
+                        'Cancel': function () {
+                            $(this).dialog('close');
+                        }
+                    }
+                }">
+                            <!-- ko with: editTemplateField -->
+                            <table class="defaultTable">
+                                <thead>
+                                    <tr>
+                                        <th>Name</th>
+                                        <th style="text-align:right; padding-bottom: 2px">Value</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td>Field Description</td>
+                                        <td style="text-align:right; padding-bottom: 2px">
+                                            <input type="text" data-bind="value: Description, event: { change: $parent.updateTemplateFieldName }" />
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>Field Name</td>
+                                        <td style="text-align: right; padding-bottom: 2px; ">
+                                            <input type="text" data-bind="value: Name" />
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>Field Sort Order</td>
+                                        <td style="text-align:right; padding-bottom: 2px">
+                                            <input type="text" data-bind="value: SortOrder" />
+                                        </td>
+                                    </tr>
+                                </tbody>
+                                <tfoot>
+                                </tfoot>
+                            </table>
+                            <!-- /ko -->
+                </div>
+            </div>
+            <div data-bind="visible: $root.editableTemplateDataItem">
+                <!-- ko with: $root.editableTemplateDataItem -->
+                <div id="editor">
+                    <table style="width: 100%">
+
+                        <tbody>
+                            <tr>
+                                <td style="height:0.5em;"></td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    <textarea style="height:10em;width:100%;" data-bind="value: Value, valueUpdate: 'afterkeydown'" onkeydown="handlerTab(event, this)"></textarea>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td style="height: 0.5em;"></td>
+                            </tr>
+                            <tr>
+                                <td style="text-align:right;padding:0;">
+                                    <button style="font-size:0.85em;" data-bind="click: $root.updateTemplateDataItem, button: { text: true, icons: { primary: 'ui-icon-check' } }">update</button>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td style="height: 0.5em;"></td>
+                            </tr>
+                        </tbody>
+
+                    </table>
+                </div>
+                <!-- /ko -->
+            </div>
+            <!-- /ko -->
+        </div>
+        
+        <div id="tab-datasets">
+            <table class="defaultTable">
+                <thead>
+                    <tr>
+                        <th style="width: 250px;">Name</th>
+                        <th></th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <!-- ko foreach: dataSets -->
+                    <tr>
+                        <td><input id="addDataSetName" data-bind="value: Name, title: Name" /></td>
+                        <td class="buttonColumn">
+                            <button data-bind="click: $parent.updateDataSet, button: { text: false, icons: { primary: 'ui-icon-tick' } }">update</button>
+                        </td>
+                        <td class="buttonColumn">
+                            <button data-bind="click: $parent.addDataSet, button: { text: false, icons: { primary: 'ui-icon-plus' } }">add</button>
+                        </td>
+                    </tr>
+                    <!-- /ko -->   
+                </tbody>
+                <tfoot>
+                    <tr>
+                        <td><input id="addDataSetName" /></td>
+                        <td></td>
+                        <th></th>
+
+                    </tr>
+                </tfoot>
+            </table>
+        </div>
+        <div id="tab-messages">
+            <table style="font-size: 0.85em;">
+                <thead>
+                    <tr>
+                        <th style="width: 250px;">Date</th>
+                        <th>Message</th>
+                    </tr>
+                </thead>
+                <tbody id="messages">
+
+                </tbody>
+            </table>
+        </div>
+    </div>
+    <!-- /ko -->
+    <div id="userMessages">
+        <table stye="defaultTable" style="font-size: 0.85em; color:crimson;">
+            <tbody>
+                <!-- ko foreach: DataDocument.User.messages -->
+                <tr>
+                    <td data-bind="text: $data"></td>
+                </tr>
+                <!-- /ko --> 
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<script src='@Url.Content("~/Scripts/moment.min.js")' type="text/javascript"></script>
+<script src='@Url.Content("~/Scripts/Views/edit.js")' type="text/javascript"></script>
+@section scripts {
+    <script type="text/javascript">
+        $(function () {
+            var messageTarget = $("#messages");
+            var id = @if(Model.HasValue){ @Model.Value } else { <text>null</text> };
+
+            var config = new DataDocument.VMConfig({
+                baseUrl: '@Url.Content("~/api")',
+                message: function (m) {
+                    messageTarget.append("<tr><td>" + moment().format('DD-MMM-YYYY HH:MM:SS') + "</td><td>" + m + "</td></tr>")
+                },
+                messageClear: function () {
+                    messageTarget.empty("tr");
+                }
+            })
+            var pageViewModel = new DataDocument.VM(config);
+            $.when(
+                pageViewModel.initialize().then(function () {
+                    config.message('model initialized');
+                })
+            ).then(function () {
+                pageViewModel.load(id).then(function () {
+                    config.message('document loaded');
+                })
+            }).then(function () {
+                config.message('data bind started');
+                ko.applyBindings(pageViewModel);
+                config.message('data bind complete');
+            });
+            
+        });
+
+        handlerTab = function (e, context) {
+            if (e.keyCode === 9) { // tab was pressed
+
+                // get caret position/selection
+                var target = context;
+                var val = target.value,
+                    start = target.selectionStart,
+                    end = target.selectionEnd;
+
+                // set textarea value to: text before caret + tab + text after caret
+                var newValue = val.substring(0, start) + '\t' + val.substring(end);
+
+                // put caret at right position again
+                this.selectionStart = this.selectionEnd = start + 1;
+
+                
+                context.value = newValue;
+                //target.value
+                //$(target).val(value);
+
+                // prevent the focus lose
+                return false;
+
+            }
+        };
+
+    </script>
+}
+
+@section styles {
+    .defaultTable {
+	    border-collapse: collapse;
+        width: 100%;
+	}
+
+    .defaultTable td {
+        padding: 0em 0em 0em 0em;
+    }
+
+    .defaultTable .ui-button-text {
+        padding-top: 0; padding-bottom: 0;
+    }
+
+
+    textarea {
+        max-width: inherit;     
+    }
+    
+}
